@@ -1,22 +1,6 @@
-import {CONN, INFT} from "./constants";
-import axios from "axios";
-import BN from "bn.js";
+import {CONN} from "./constants";
 import {Keypair, PublicKey} from "@solana/web3.js";
 import {AccountInfo, MintInfo, Token, TOKEN_PROGRAM_ID} from "@solana/spl-token";
-
-export async function onlyTokensWithSupplyOfOne(tokens: INFT[]) {
-  const responses = await axios.all(tokens.map(t => deserializeTokenMint(t.mint)));
-  // console.log(responses)
-
-  const filteredTokens = tokens.map((t, i) => ({
-    ...t,
-    supply: responses[i].supply,
-    mintAuthority: responses[i].mintAuthority,
-    freezeAuthority: responses[i].freezeAuthority,
-  } as INFT))
-
-  return filteredTokens.filter(t => t.supply.eq(new BN(1)));
-}
 
 export async function deserializeToken(mintPubkey: PublicKey): Promise<Token> {
   //doesn't matter which keypair goes here, we're not using it for anything. This one is long dox'ed.
