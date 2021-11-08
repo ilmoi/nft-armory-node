@@ -6,6 +6,7 @@ import {getEnumKeyByEnumValue, joinArraysOnKey, okToFailAsync} from "./helpers/u
 import {deserializeTokenAccount} from "./helpers/spl-token";
 import {EditionData} from "@metaplex/js/lib/programs/metadata";
 import {INFT, INFTParams} from "./helpers/types";
+import fs from 'fs'
 
 const {
   metaplex: {Store, AuctionManager,},
@@ -59,7 +60,16 @@ export async function getMetadataByOwner(owner: AnyPublicKey) {
 
 export async function getHolderByMint(mint: PublicKey) {
   const tokens = await CONN.getTokenLargestAccounts(mint);
-  return tokens.value[0].address; //since it's an NFT, we just grab the 1st account
+  if (tokens && tokens.value.length > 0) {
+    return tokens.value[0].address; //since it's an NFT, we just grab the 1st account
+  }
+}
+
+export async function getExternalMetadata(uri: string) {
+  const response = await axios.get(uri);
+  if (response) {
+    return response.data;
+  }
 }
 
 async function getEditionInfoByMint(mint: PublicKey) {
@@ -80,7 +90,7 @@ async function getEditionInfoByMint(mint: PublicKey) {
       editionPDA = pda;
       editionData = new programs.metadata.Edition(pda, info);
       // we can further get master edition info, since we know the parent
-      ({masterEditionPDA, masterEditionData} = await getParentEdition(editionData.data));
+      ({masterEditionPDA, masterEditionData} = await okToFailAsync(getParentEdition, [editionData.data]));
       break;
     case programs.metadata.MetadataKey.MasterEditionV1:
     case programs.metadata.MetadataKey.MasterEditionV2:
@@ -120,20 +130,24 @@ export function deserializeMetadataOnchain(metadatas: programs.metadata.Metadata
 export async function turnMetadatasIntoNFTs(metadatas: programs.metadata.Metadata[]): Promise<INFT[]> {
   let NFTs = deserializeMetadataOnchain(metadatas);
 
+  //todo temp
+  // NFTs = NFTs.slice(0, 100);
+
   const enrichedNFTs = await Promise.all(
     NFTs.map(async n => {
+      console.log(`Processing NFT ${n.mint}`)
       const address = await okToFailAsync(getHolderByMint, [new PublicKey(n.metadataOnchain.mint)]);
       return {
         mint: n.mint,
         address,
-        splTokenInfo: await deserializeTokenAccount(n.mint, address),
-        metadataExternal: await okToFailAsync(axios.get, [n.metadataOnchain.data.uri]),
+        splTokenInfo: await okToFailAsync(deserializeTokenAccount, [n.mint, address]),
+        metadataExternal: await okToFailAsync(getExternalMetadata, [n.metadataOnchain.data.uri]),
         ...(await okToFailAsync(getEditionInfoByMint, [n.mint], true)),
       }
     })
   )
   NFTs = joinArraysOnKey(NFTs, enrichedNFTs, "mint");
-  console.log(`Prepared a total of ${NFTs.length}`);
+  console.log(`Prepared a total of ${NFTs.length} NFTs`);
   return NFTs
 }
 
@@ -143,7 +157,7 @@ export async function getNFTs(
     creators,
     mint,
     updateAuthority
-  } = {} as INFTParams) {
+  } = {} as INFTParams): Promise<INFT[]> {
   let metadatas;
   if (owner) {
     metadatas = await getMetadataByOwner(owner);
@@ -159,9 +173,42 @@ export async function getNFTs(
   return turnMetadatasIntoNFTs(metadatas);
 }
 
-// --------------------------------------- call stuff
+// --------------------------------------- fs
 
-// getNFTs({owner: OWNER}).then(console.log);
-// getNFTs({creators: [CREATOR]}).then(console.log);
-// getNFTs({updateAuthority: CREATOR}).then(console.log);
-getNFTs({mint: new PublicKey("2tUJ84YLqEUqZHuMkV31PWM4nkfGWu39b73kvV6Ca8n2")}).then(console.log);
+async function writeToDisk(nfts: INFT[]) {
+  nfts.forEach(n => {
+    const data = JSON.stringify(n, (k, v) => {return v instanceof PublicKey ? v.toBase58() : v}, 2);
+    fs.writeFile(`output/nft-${n.mint.toBase58()}.json`, data, (err) => {
+      if (err) {
+        console.log('Write error:', err);
+      }
+    });
+  })
+  console.log('Done writing!')
+}
+
+// --------------------------------------- play
+
+const auroryCreator = new PublicKey("9vwYtcJsH1MskNaixcjgNBnvBDkTBhyg25umod1rgMQL");
+const degenCreator = new PublicKey("9BKWqDHfHZh9j39xakYVMdr6hXmCLHH5VfCpeq2idU9L");
+const sneksCreator = new PublicKey("AuTF3kgAyBzsfjGcNABTSzzXK4bVcZcyZJtpCrayxoVp");
+const solanautsCreator = new PublicKey("BDYYJ1VzPDXwJoARMZNnN4MX4cZNjVvc5DfFaKzgrruz");
+
+const ownerMainnet = new PublicKey("5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK");
+
+//triage
+const creator = auroryCreator;
+const owner = ownerMainnet;
+
+async function play() {
+  const startTime = performance.now();
+  const nfts = await getNFTs({owner}); //x => console.log(JSON.stringify(x, null, 4))
+  // const nfts = await getNFTs({creators: [creator]});
+  // const nfts = await getNFTs({updateAuthority: creator});
+  // const nfts = await await getNFTs({mint: new PublicKey("2tUJ84YLqEUqZHuMkV31PWM4nkfGWu39b73kvV6Ca8n2")});
+  const endTime = performance.now();
+  console.log(`Total time: ${(endTime - startTime)/1000}s`)
+  await writeToDisk(nfts);
+}
+
+play()
