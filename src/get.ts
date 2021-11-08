@@ -197,7 +197,7 @@ async function play() {
   // const nfts = await getNFTs({owner});
   // const nfts = await getNFTs({creators: [creator]});
   // const nfts = await getNFTs({updateAuthority: creator});
-  const nfts = await getNFTs({mint: new PublicKey("FPxRKq2NGCHWW88HzBiu4HAG7cyrz1jBpLZJ9RQfCsFX")});
+  const nfts = await getNFTs({mint: new PublicKey("Ep6YXiX9tEvhvFpNkDAXLd3yk35Y9kom5nBXFk2ZtV9L")});
   const endTime = performance.now();
   console.log(`Total time: ${(endTime - startTime) / 1000}s`)
   console.log(nfts);

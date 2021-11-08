@@ -86,7 +86,7 @@ export async function updatePrimarySaleHappenedViaToken(
 
 // --------------------------------------- play
 
-async function prepNewMetadataData(
+export async function prepNewMetadataData(
   uri: string,
   wallet: Wallet,
 ): Promise<programs.metadata.MetadataDataData> {
@@ -145,10 +145,10 @@ async function play() {
 //   true,
 // )
 
-updatePrimarySaleHappenedViaToken(
-  CONN,
-  new LocalWallet(),
-  undefined,
-  masterMintDevnet,
-  undefined,
-)
+// updatePrimarySaleHappenedViaToken(
+//   CONN,
+//   new LocalWallet(),
+//   undefined,
+//   masterMintDevnet,
+//   undefined,
+// )
