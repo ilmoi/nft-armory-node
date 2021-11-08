@@ -2,11 +2,10 @@ import {PublicKey} from "@solana/web3.js"
 import {CONN} from "./helpers/constants";
 import {Account, AnyPublicKey, programs} from '@metaplex/js';
 import axios from "axios";
-import {getEnumKeyByEnumValue, joinArraysOnKey, okToFailAsync} from "./helpers/util";
+import {getEnumKeyByEnumValue, joinArraysOnKey, okToFailAsync, writeToDisk} from "./helpers/util";
 import {deserializeTokenAccount} from "./helpers/spl-token";
 import {EditionData} from "@metaplex/js/lib/programs/metadata";
 import {INFT, INFTParams} from "./helpers/types";
-import fs from 'fs'
 
 const {
   metaplex: {Store, AuctionManager,},
@@ -90,7 +89,10 @@ export async function getEditionInfoByMint(mint: PublicKey) {
       editionPDA = pda;
       editionData = new programs.metadata.Edition(pda, info);
       // we can further get master edition info, since we know the parent
-      ({masterEditionPDA, masterEditionData} = await okToFailAsync(getParentEdition, [editionData.data]));
+      ({
+        masterEditionPDA,
+        masterEditionData
+      } = await okToFailAsync(getParentEdition, [editionData.data]));
       break;
     case programs.metadata.MetadataKey.MasterEditionV1:
     case programs.metadata.MetadataKey.MasterEditionV2:
@@ -173,19 +175,6 @@ export async function getNFTs(
   return turnMetadatasIntoNFTs(metadatas);
 }
 
-// --------------------------------------- fs
-
-async function writeToDisk(nfts: INFT[]) {
-  nfts.forEach(n => {
-    const data = JSON.stringify(n, (k, v) => {return v instanceof PublicKey ? v.toBase58() : v}, 2);
-    fs.writeFile(`output/nft-${n.mint.toBase58()}.json`, data, (err) => {
-      if (err) {
-        console.log('Write error:', err);
-      }
-    });
-  })
-  console.log('Done writing!')
-}
 
 // --------------------------------------- play
 
@@ -209,9 +198,9 @@ async function play() {
   // const nfts = await getNFTs({updateAuthority: creator});
   // const nfts = await await getNFTs({mint: new PublicKey("2tUJ84YLqEUqZHuMkV31PWM4nkfGWu39b73kvV6Ca8n2")});
   const endTime = performance.now();
-  console.log(`Total time: ${(endTime - startTime)/1000}s`)
+  console.log(`Total time: ${(endTime - startTime) / 1000}s`)
   console.log(nfts);
-  // await writeToDisk(nfts);
+  await writeToDisk('output', nfts);
 }
 
 play()
