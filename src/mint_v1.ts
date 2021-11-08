@@ -7,7 +7,7 @@ import {loadKeypairSync, stringifyPubkeysInObject} from "./helpers/util";
 import BN from "bn.js";
 import {ASSOCIATED_TOKEN_PROGRAM_ID, MintLayout, Token, TOKEN_PROGRAM_ID} from "@solana/spl-token";
 
-class LocalWallet {
+export class LocalWallet {
   keypair: Keypair;
   publicKey: PublicKey;
 
@@ -50,7 +50,7 @@ export async function mintEditionFromMaser(
   connection: Connection,
   wallet: Wallet,
   masterEditionMint: PublicKey,
-  updateAuthority: PublicKey,
+  updateAuthority?: PublicKey,
 ) {
   const masterPDA = await programs.metadata.MasterEdition.getPDA(masterEditionMint);
   const masterMetaPDA = await programs.metadata.Metadata.getPDA(masterEditionMint);
@@ -119,7 +119,7 @@ export async function mintEditionFromMaser(
       ///   9. `[]` Update authority info for new metadata
       //todo experiment with this - can we set this to anyone? who's the right choice?
       // yes can be set to arb value
-      updateAuthority,
+      updateAuthority : updateAuthority ? updateAuthority : wallet.publicKey,
       ///   3. `[writable]` Mint of new token
       mint: mint.publicKey,
       ///   5. `[signer]` Mint authority of new mint
@@ -144,7 +144,7 @@ export async function mintEditionFromMaser(
 
   // ---------------- send to metaplex
   const txId = await actions.sendTransaction({
-    connection: CONN,
+    connection,
     signers: [mint],
     txs: [
       createMintTx,
@@ -176,11 +176,11 @@ export async function mintEditionFromMaser(
 //   100
 // );
 
-const masterMintDevnet = new PublicKey("BLpau83HHv69KcgkfNqpv39J3uCS3aYapzSSz36UCAjV");
+export const masterMintDevnet = new PublicKey("BLpau83HHv69KcgkfNqpv39J3uCS3aYapzSSz36UCAjV");
+export const editionMintDevnet = new PublicKey("FPxRKq2NGCHWW88HzBiu4HAG7cyrz1jBpLZJ9RQfCsFX");
 
-mintEditionFromMaser(
-  CONN,
-  new LocalWallet(),
-  masterMintDevnet,
-  new PublicKey("AGsJu1jZmFcVDPdm6bbaP54S3sMEinxmdiYWhaBBDNVX")
-)
+// mintEditionFromMaser(
+//   CONN,
+//   new LocalWallet(),
+//   masterMintDevnet,
+// )
