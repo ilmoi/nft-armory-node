@@ -22,8 +22,6 @@ class LocalWallet {
   };
 }
 
-
-
 // --------------------------------------- mint
 
 async function mintNewNFT() {
@@ -36,10 +34,6 @@ async function mintNewNFT() {
   console.log('Minted a new NFT!', stringifyPubkeysInObject(result));
   return result
 }
-
-
-
-
 
 // --------------------------------------- new editions via token
 

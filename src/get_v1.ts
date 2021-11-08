@@ -1,6 +1,6 @@
 import {TOKEN_PROGRAM_ID} from "@solana/spl-token";
 import {Connection, PublicKey} from "@solana/web3.js"
-import {CONN, OWNER} from "./helpers/constants";
+import {CONN} from "./helpers/constants";
 import {Account, AnyPublicKey, programs} from '@metaplex/js';
 import axios from "axios";
 import BN from "bn.js";
@@ -161,4 +161,4 @@ class MyMetadata extends Metadata {
 
 // --------------------------------------- call stuff
 
-getNFTsByOwner(OWNER);
+// getNFTsByOwner(OWNER);
