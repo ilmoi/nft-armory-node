@@ -3,7 +3,7 @@ import {CONN} from "./helpers/constants";
 import {Account, AnyPublicKey, programs} from '@metaplex/js';
 import axios from "axios";
 import {getEnumKeyByEnumValue, joinArraysOnKey, okToFailAsync, writeToDisk} from "./helpers/util";
-import {deserializeTokenAccount} from "./helpers/spl-token";
+import {deserializeTokenAccount, deserializeTokenMint} from "./helpers/spl-token";
 import {EditionData} from "@metaplex/js/lib/programs/metadata";
 import {INFT, INFTParams} from "./helpers/types";
 
@@ -87,16 +87,16 @@ export async function getEditionInfoByMint(mint: PublicKey) {
   switch (key) {
     case programs.metadata.MetadataKey.EditionV1:
       editionPDA = pda;
-      editionData = new programs.metadata.Edition(pda, info);
+      editionData = (new programs.metadata.Edition(pda, info)).data;
       // we can further get master edition info, since we know the parent
       ({
         masterEditionPDA,
         masterEditionData
-      } = await okToFailAsync(getParentEdition, [editionData.data]));
+      } = await okToFailAsync(getParentEdition, [editionData]));
       break;
     case programs.metadata.MetadataKey.MasterEditionV1:
     case programs.metadata.MetadataKey.MasterEditionV2:
-      masterEditionData = new programs.metadata.MasterEdition(pda, info);
+      masterEditionData = (new programs.metadata.MasterEdition(pda, info)).data;
       masterEditionPDA = pda;
       break;
   }
@@ -113,7 +113,7 @@ export async function getEditionInfoByMint(mint: PublicKey) {
 export async function getParentEdition(editionData: EditionData) {
   const masterEditionPDA = new PublicKey(editionData.parent);
   const masterInfo = await Account.getInfo(CONN, masterEditionPDA);
-  const masterEditionData = new programs.metadata.MasterEdition(masterEditionPDA, masterInfo);
+  const masterEditionData = (new programs.metadata.MasterEdition(masterEditionPDA, masterInfo)).data;
   return {masterEditionPDA, masterEditionData};
 }
 
@@ -143,6 +143,7 @@ export async function turnMetadatasIntoNFTs(metadatas: programs.metadata.Metadat
         mint: n.mint,
         address,
         splTokenInfo: await okToFailAsync(deserializeTokenAccount, [n.mint, address]),
+        splMintInfo: await okToFailAsync(deserializeTokenMint, [n.mint]),
         metadataExternal: await okToFailAsync(getExternalMetadata, [n.metadataOnchain.data.uri]),
         ...(await okToFailAsync(getEditionInfoByMint, [n.mint], true)),
       }
@@ -193,14 +194,14 @@ const owner = ownerDevnet;
 
 async function play() {
   const startTime = performance.now();
-  const nfts = await getNFTs({owner}); //x => console.log(JSON.stringify(x, null, 4))
+  // const nfts = await getNFTs({owner});
   // const nfts = await getNFTs({creators: [creator]});
   // const nfts = await getNFTs({updateAuthority: creator});
-  // const nfts = await await getNFTs({mint: new PublicKey("2tUJ84YLqEUqZHuMkV31PWM4nkfGWu39b73kvV6Ca8n2")});
+  const nfts = await getNFTs({mint: new PublicKey("HWYaTDc9ATJF4tH6Jtg41zauKujZAGoQaGDD9gDaCQjx")});
   const endTime = performance.now();
   console.log(`Total time: ${(endTime - startTime) / 1000}s`)
   console.log(nfts);
   await writeToDisk('output', nfts);
 }
 
-play()
+// play()
