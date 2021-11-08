@@ -3,7 +3,10 @@ import {PublicKey} from "@solana/web3.js";
 import {CONN} from "./helpers/constants";
 import {editionMintDevnet, LocalWallet, masterMintDevnet} from "./mint_v1";
 import axios from "axios";
-import { UpdateMetadata } from "./temp_borsh";
+import {UpdateMetadata} from "./temp_borsh";
+import {ASSOCIATED_TOKEN_PROGRAM_ID, Token, TOKEN_PROGRAM_ID} from "@solana/spl-token";
+
+// --------------------------------------- update as edition owner
 
 //update authority can update 3 things:
 //1) metadata if it's mutable (NOTE: limited editions are NEVER mutable - see mint_limited_edition, ie only master is mutable)
@@ -13,16 +16,14 @@ import { UpdateMetadata } from "./temp_borsh";
 export async function updateMetadata(
   connection: Connection,
   wallet: Wallet, //assume that wallet is the authority
+  editionMetadataPDA?: PublicKey, //need to pass either the mint, or the PDA directly
   editionMint?: PublicKey, //this can be master or limited
-  metadataPDA?: PublicKey, //need to pass either the mint, or the PDA directly
   newMetadataData?: any,
   newUpdateAuthority?: PublicKey,
   primarySaleHappened?: boolean,
 ) {
-  const metadata = metadataPDA ? metadataPDA : (await programs.metadata.Metadata.getPDA(editionMint!))
-
-  console.log(newMetadataData)
-
+  const metadata = editionMetadataPDA ? editionMetadataPDA
+    : (await programs.metadata.Metadata.getPDA(editionMint!))
   const updateTx = new UpdateMetadata(
     {feePayer: wallet.publicKey},
     {
@@ -33,10 +34,6 @@ export async function updateMetadata(
       primarySaleHappened,
     }
   )
-
-  console.log('resulting data:')
-  console.log(updateTx.instructions[0].data)
-
   // ---------------- send to metaplex
   const txId = await actions.sendTransaction({
     connection,
@@ -50,6 +47,42 @@ export async function updateMetadata(
   return txId
 }
 
+// --------------------------------------- update as master owner
+
+//works on both master and normal editions
+//todo not sure if worth showing in FE, might bring more confusion than worth
+export async function updatePrimarySaleHappenedViaToken(
+  connection: Connection,
+  wallet: Wallet,
+  editionMetadataPDA?: PublicKey, //need to pass either the mint, or the PDA directly
+  editionMint?: PublicKey,
+  editionTokenAccount?: PublicKey,
+) {
+  const metadata = editionMetadataPDA ? editionMetadataPDA
+    : (await programs.metadata.Metadata.getPDA(editionMint!))
+  const tokenAccount = editionTokenAccount ? editionTokenAccount
+    : await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, editionMint!, wallet.publicKey);
+
+  const updateTx = new programs.metadata.UpdatePrimarySaleHappenedViaToken(
+    {feePayer: wallet.publicKey},
+    {
+      metadata,
+      owner: wallet.publicKey,
+      tokenAccount,
+    }
+  )
+  // ---------------- send to metaplex
+  const txId = await actions.sendTransaction({
+    connection,
+    signers: [],
+    txs: [
+      updateTx,
+    ],
+    wallet,
+  });
+  console.log(txId);
+  return txId
+}
 
 // --------------------------------------- play
 
@@ -92,8 +125,8 @@ async function play() {
   await updateMetadata(
     CONN,
     new LocalWallet(),
-    masterMintDevnet,
     undefined,
+    masterMintDevnet,
     newData,
     undefined,
     undefined,
@@ -102,12 +135,20 @@ async function play() {
 
 // play()
 
-updateMetadata(
+// updateMetadata(
+//   CONN,
+//   new LocalWallet(),
+//   undefined,
+//   editionMintDevnet,
+//   undefined,
+//   undefined,
+//   true,
+// )
+
+updatePrimarySaleHappenedViaToken(
   CONN,
   new LocalWallet(),
-  editionMintDevnet,
   undefined,
+  masterMintDevnet,
   undefined,
-  undefined,
-  true,
 )
