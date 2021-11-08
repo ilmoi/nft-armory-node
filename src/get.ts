@@ -1,5 +1,5 @@
 import {PublicKey} from "@solana/web3.js"
-import {CONN, CREATOR, OWNER} from "./helpers/constants";
+import {CONN} from "./helpers/constants";
 import {Account, AnyPublicKey, programs} from '@metaplex/js';
 import axios from "axios";
 import {getEnumKeyByEnumValue, joinArraysOnKey, okToFailAsync} from "./helpers/util";
@@ -72,7 +72,7 @@ export async function getExternalMetadata(uri: string) {
   }
 }
 
-async function getEditionInfoByMint(mint: PublicKey) {
+export async function getEditionInfoByMint(mint: PublicKey) {
   //untriaged
   const pda = await programs.metadata.Edition.getPDA(mint);
   const info = await Account.getInfo(CONN, pda);
@@ -194,11 +194,13 @@ const degenCreator = new PublicKey("9BKWqDHfHZh9j39xakYVMdr6hXmCLHH5VfCpeq2idU9L
 const sneksCreator = new PublicKey("AuTF3kgAyBzsfjGcNABTSzzXK4bVcZcyZJtpCrayxoVp");
 const solanautsCreator = new PublicKey("BDYYJ1VzPDXwJoARMZNnN4MX4cZNjVvc5DfFaKzgrruz");
 
-const ownerMainnet = new PublicKey("5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK");
+export const ownerMainnet = new PublicKey("5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK");
+export const ownerDevnet = new PublicKey("AGsJu1jZmFcVDPdm6bbaP54S3sMEinxmdiYWhaBBDNVX");
+export const creatorDevnet = new PublicKey("75ErM1QcGjHiPMX7oLsf9meQdGSUs4ZrwS2X8tBpsZhA");
 
 //triage
 const creator = auroryCreator;
-const owner = ownerMainnet;
+const owner = ownerDevnet;
 
 async function play() {
   const startTime = performance.now();
@@ -208,7 +210,8 @@ async function play() {
   // const nfts = await await getNFTs({mint: new PublicKey("2tUJ84YLqEUqZHuMkV31PWM4nkfGWu39b73kvV6Ca8n2")});
   const endTime = performance.now();
   console.log(`Total time: ${(endTime - startTime)/1000}s`)
-  await writeToDisk(nfts);
+  console.log(nfts);
+  // await writeToDisk(nfts);
 }
 
 play()
