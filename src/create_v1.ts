@@ -30,9 +30,7 @@ export async function createMetadata(
   const txId = await actions.sendTransaction({
     connection,
     signers: [],
-    txs: [
-      createMetadataTx,
-    ],
+    txs: [createMetadataTx],
     wallet,
   });
   const x = {
@@ -71,9 +69,7 @@ export async function createMasterEdition(
   const txId = await actions.sendTransaction({
     connection,
     signers: [],
-    txs: [
-      createMetadataTx,
-    ],
+    txs: [createMetadataTx],
     wallet,
   });
   const x = {

@@ -6,11 +6,9 @@ import {editionMintDevnet, LocalWallet} from "./mint_v1";
 export async function signMetadata(
   connection: Connection,
   wallet: Wallet,
-  editionMetadataPDA?: PublicKey,
-  editionMint?: PublicKey,
+  editionMint: PublicKey,
 ) {
-  const metadata = editionMetadataPDA ? editionMetadataPDA
-    : (await programs.metadata.Metadata.getPDA(editionMint!))
+  const metadata = await programs.metadata.Metadata.getPDA(editionMint);
   const signTx = new programs.metadata.SignMetadata(
     {feePayer: wallet.publicKey},
     {
@@ -22,9 +20,7 @@ export async function signMetadata(
   const txId = await actions.sendTransaction({
     connection,
     signers: [],
-    txs: [
-      signTx,
-    ],
+    txs: [signTx],
     wallet,
   });
   console.log(txId);
@@ -34,6 +30,5 @@ export async function signMetadata(
 signMetadata(
   CONN,
   new LocalWallet(),
-  undefined,
   editionMintDevnet,
 )

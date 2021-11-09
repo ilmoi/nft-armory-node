@@ -16,14 +16,12 @@ import {ASSOCIATED_TOKEN_PROGRAM_ID, Token, TOKEN_PROGRAM_ID} from "@solana/spl-
 export async function updateMetadata(
   connection: Connection,
   wallet: Wallet, //assume that wallet is the authority
-  editionMetadataPDA?: PublicKey, //need to pass either the mint, or the PDA directly
-  editionMint?: PublicKey, //this can be master or limited
+  editionMint: PublicKey, //this can be master or limited
   newMetadataData?: any,
   newUpdateAuthority?: PublicKey,
   primarySaleHappened?: boolean,
 ) {
-  const metadata = editionMetadataPDA ? editionMetadataPDA
-    : (await programs.metadata.Metadata.getPDA(editionMint!))
+  const metadata = await programs.metadata.Metadata.getPDA(editionMint);
   const updateTx = new UpdateMetadata(
     {feePayer: wallet.publicKey},
     {
@@ -38,9 +36,7 @@ export async function updateMetadata(
   const txId = await actions.sendTransaction({
     connection,
     signers: [],
-    txs: [
-      updateTx,
-    ],
+    txs: [updateTx],
     wallet,
   });
   console.log(txId);
@@ -54,14 +50,10 @@ export async function updateMetadata(
 export async function updatePrimarySaleHappenedViaToken(
   connection: Connection,
   wallet: Wallet,
-  editionMetadataPDA?: PublicKey, //need to pass either the mint, or the PDA directly
-  editionMint?: PublicKey,
-  editionTokenAccount?: PublicKey,
+  editionMint: PublicKey,
 ) {
-  const metadata = editionMetadataPDA ? editionMetadataPDA
-    : (await programs.metadata.Metadata.getPDA(editionMint!))
-  const tokenAccount = editionTokenAccount ? editionTokenAccount
-    : await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, editionMint!, wallet.publicKey);
+  const metadata = await programs.metadata.Metadata.getPDA(editionMint);
+  const tokenAccount = await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, editionMint, wallet.publicKey);
 
   const updateTx = new programs.metadata.UpdatePrimarySaleHappenedViaToken(
     {feePayer: wallet.publicKey},
@@ -75,9 +67,7 @@ export async function updatePrimarySaleHappenedViaToken(
   const txId = await actions.sendTransaction({
     connection,
     signers: [],
-    txs: [
-      updateTx,
-    ],
+    txs: [updateTx],
     wallet,
   });
   console.log(txId);
@@ -125,7 +115,6 @@ async function play() {
   await updateMetadata(
     CONN,
     new LocalWallet(),
-    undefined,
     masterMintDevnet,
     newData,
     undefined,
@@ -138,17 +127,14 @@ async function play() {
 // updateMetadata(
 //   CONN,
 //   new LocalWallet(),
-//   undefined,
 //   editionMintDevnet,
 //   undefined,
 //   undefined,
 //   true,
 // )
-
+//
 // updatePrimarySaleHappenedViaToken(
 //   CONN,
 //   new LocalWallet(),
-//   undefined,
 //   masterMintDevnet,
-//   undefined,
 // )
