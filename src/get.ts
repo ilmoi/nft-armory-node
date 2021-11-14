@@ -173,6 +173,7 @@ export async function getNFTs(
   } else {
     throw new Error("You must pass one of owner / creators / mint / updateAuthority");
   }
+  console.log(`got ${metadatas.length} metadatas`)
   return turnMetadatasIntoNFTs(metadatas);
 }
 
@@ -183,25 +184,26 @@ const auroryCreator = new PublicKey("9vwYtcJsH1MskNaixcjgNBnvBDkTBhyg25umod1rgMQ
 const degenCreator = new PublicKey("9BKWqDHfHZh9j39xakYVMdr6hXmCLHH5VfCpeq2idU9L");
 const sneksCreator = new PublicKey("AuTF3kgAyBzsfjGcNABTSzzXK4bVcZcyZJtpCrayxoVp");
 const solanautsCreator = new PublicKey("BDYYJ1VzPDXwJoARMZNnN4MX4cZNjVvc5DfFaKzgrruz");
+const creator100 = new PublicKey("5SNz7scF5xiSZxmSzgQRyVGdY8PhEHM5LDMwCKGoFQTZ");
 
 export const ownerMainnet = new PublicKey("5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK");
 export const ownerDevnet = new PublicKey("AGsJu1jZmFcVDPdm6bbaP54S3sMEinxmdiYWhaBBDNVX");
 export const creatorDevnet = new PublicKey("75ErM1QcGjHiPMX7oLsf9meQdGSUs4ZrwS2X8tBpsZhA");
 
 //triage
-const creator = auroryCreator;
-const owner = ownerDevnet;
+const creator = creator100;
+const owner = ownerMainnet;
 
 async function play() {
   const startTime = performance.now();
   // const nfts = await getNFTs({owner});
-  // const nfts = await getNFTs({creators: [creator]});
+  const nfts = await getNFTs({creators: [creator]});
   // const nfts = await getNFTs({updateAuthority: creator});
-  const nfts = await getNFTs({mint: new PublicKey("Ep6YXiX9tEvhvFpNkDAXLd3yk35Y9kom5nBXFk2ZtV9L")});
+  // const nfts = await getNFTs({mint: new PublicKey("Ep6YXiX9tEvhvFpNkDAXLd3yk35Y9kom5nBXFk2ZtV9L")});
   const endTime = performance.now();
   console.log(`Total time: ${(endTime - startTime) / 1000}s`)
-  console.log(nfts);
-  await writeToDisk('output', nfts);
+  // console.log(nfts);
+  // await writeToDisk('output', nfts);
 }
 
 play()

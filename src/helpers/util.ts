@@ -105,3 +105,9 @@ export async function writeToDisk(dir: string, arr: any[]) {
   })
   console.log('Done writing!')
 }
+
+export function loadFromDisk(dir: string) {
+  const files = fs.readdirSync(dir)
+  return files.map(f => JSON.parse(fs.readFileSync(`${dir}/${f}`, `utf8`)))
+}
+
