@@ -1,0 +1,179 @@
+{
+  "blockTime": 1635749390,
+  "meta": {
+    "err": null,
+    "fee": 5000,
+    "innerInstructions": [
+      {
+        "index": 0,
+        "instructions": [
+          {
+            "parsed": {
+              "info": {
+                "destination": "3cdRoPpJj9SB4F1k5Ei4kX9n6TSoxDY2PPDqbcRfiY9S",
+                "lamports": 2039280,
+                "source": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK"
+              },
+              "type": "transfer"
+            },
+            "program": "system",
+            "programId": "11111111111111111111111111111111"
+          },
+          {
+            "parsed": {
+              "info": {
+                "account": "3cdRoPpJj9SB4F1k5Ei4kX9n6TSoxDY2PPDqbcRfiY9S",
+                "space": 165
+              },
+              "type": "allocate"
+            },
+            "program": "system",
+            "programId": "11111111111111111111111111111111"
+          },
+          {
+            "parsed": {
+              "info": {
+                "account": "3cdRoPpJj9SB4F1k5Ei4kX9n6TSoxDY2PPDqbcRfiY9S",
+                "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              },
+              "type": "assign"
+            },
+            "program": "system",
+            "programId": "11111111111111111111111111111111"
+          },
+          {
+            "parsed": {
+              "info": {
+                "account": "3cdRoPpJj9SB4F1k5Ei4kX9n6TSoxDY2PPDqbcRfiY9S",
+                "mint": "So11111111111111111111111111111111111111112",
+                "owner": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
+                "rentSysvar": "SysvarRent111111111111111111111111111111111"
+              },
+              "type": "initializeAccount"
+            },
+            "program": "spl-token",
+            "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          }
+        ]
+      }
+    ],
+    "logMessages": [
+      "Program ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL invoke [1]",
+      "Program log: Transfer 2039280 lamports to the associated token account",
+      "Program 11111111111111111111111111111111 invoke [2]",
+      "Program 11111111111111111111111111111111 success",
+      "Program log: Allocate space for the associated token account",
+      "Program 11111111111111111111111111111111 invoke [2]",
+      "Program 11111111111111111111111111111111 success",
+      "Program log: Assign the associated token account to the SPL Token program",
+      "Program 11111111111111111111111111111111 invoke [2]",
+      "Program 11111111111111111111111111111111 success",
+      "Program log: Initialize the associated token account",
+      "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+      "Program log: Instruction: InitializeAccount",
+      "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 3683 of 179567 compute units",
+      "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+      "Program ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL consumed 24765 of 200000 compute units",
+      "Program ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL success"
+    ],
+    "postBalances": [
+      3351838059,
+      2039280,
+      151220760682,
+      1,
+      1089991680,
+      1,
+      898174080
+    ],
+    "postTokenBalances": [
+      {
+        "accountIndex": 1,
+        "mint": "So11111111111111111111111111111111111111112",
+        "uiTokenAmount": {
+          "amount": "0",
+          "decimals": 9,
+          "uiAmount": null,
+          "uiAmountString": "0"
+        }
+      }
+    ],
+    "preBalances": [
+      3353882339,
+      0,
+      151220760682,
+      1,
+      1089991680,
+      1,
+      898174080
+    ],
+    "preTokenBalances": [],
+    "rewards": [],
+    "status": {
+      "Ok": null
+    }
+  },
+  "slot": 104609784,
+  "transaction": {
+    "message": {
+      "accountKeys": [
+        {
+          "pubkey": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
+          "signer": true,
+          "writable": true
+        },
+        {
+          "pubkey": "3cdRoPpJj9SB4F1k5Ei4kX9n6TSoxDY2PPDqbcRfiY9S",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "pubkey": "So11111111111111111111111111111111111111112",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "pubkey": "11111111111111111111111111111111",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "pubkey": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "pubkey": "SysvarRent111111111111111111111111111111111",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "pubkey": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+          "signer": false,
+          "writable": false
+        }
+      ],
+      "instructions": [
+        {
+          "parsed": {
+            "info": {
+              "account": "3cdRoPpJj9SB4F1k5Ei4kX9n6TSoxDY2PPDqbcRfiY9S",
+              "mint": "So11111111111111111111111111111111111111112",
+              "rentSysvar": "SysvarRent111111111111111111111111111111111",
+              "source": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
+              "systemProgram": "11111111111111111111111111111111",
+              "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "wallet": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK"
+            },
+            "type": "create"
+          },
+          "program": "spl-associated-token-account",
+          "programId": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "recentBlockhash": "4QjFUF4rzVMnHg4EqeqFfttL3sjQ9hnXrn1C9WHCEaaE"
+    },
+    "signatures": [
+      "2U87Nz4yJ7UV5aQnJvfm5rQuZC8MGJ9GdSUycErwM8yYW9W2TupNC3aSbUghX1KPW8jxDkCgEtvDQt4qqN8rJgrQ"
+    ]
+  }
+}

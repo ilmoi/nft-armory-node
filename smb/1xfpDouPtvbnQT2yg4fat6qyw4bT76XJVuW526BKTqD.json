@@ -1,0 +1,114 @@
+{
+  "mint": "1xfpDouPtvbnQT2yg4fat6qyw4bT76XJVuW526BKTqD",
+  "metadataPDA": "DfLnH6qyrbrd7s7mqvFBSb4Q7zmnFDSQpgWJLboyxW2D",
+  "metadataOnchain": {
+    "key": 4,
+    "updateAuthority": "9uBX3ASjxWvNBAD1xjbVaKA74mWGZys3RGSF7DdeDD3F",
+    "mint": "1xfpDouPtvbnQT2yg4fat6qyw4bT76XJVuW526BKTqD",
+    "data": {
+      "name": "SMB #695",
+      "symbol": "SMB",
+      "uri": "https://arweave.net/Gx23Dssd-felFEms8JU-T1N_uY2fg9FYjob6lz3gDBE",
+      "sellerFeeBasisPoints": 500,
+      "creators": [
+        {
+          "address": "9uBX3ASjxWvNBAD1xjbVaKA74mWGZys3RGSF7DdeDD3F",
+          "verified": 1,
+          "share": 100
+        }
+      ]
+    },
+    "primarySaleHappened": 1,
+    "isMutable": 1
+  },
+  "address": "E6fxR8F8stm9BdhhFEXr8a65NGXFhhMWDTiVh9ZfQpCL",
+  "splTokenInfo": {
+    "mint": "1xfpDouPtvbnQT2yg4fat6qyw4bT76XJVuW526BKTqD",
+    "owner": "5eBwXtyc1SCHNeiKmULLzP3cdaJon24LE7CyKc224mY5",
+    "amount": "1",
+    "delegateOption": 0,
+    "delegate": null,
+    "state": 1,
+    "isNativeOption": 0,
+    "isNative": false,
+    "delegatedAmount": "0",
+    "closeAuthorityOption": 0,
+    "closeAuthority": null,
+    "address": "E6fxR8F8stm9BdhhFEXr8a65NGXFhhMWDTiVh9ZfQpCL",
+    "isInitialized": true,
+    "isFrozen": false,
+    "rentExemptReserve": null
+  },
+  "splMintInfo": {
+    "mintAuthorityOption": 1,
+    "mintAuthority": "9uBX3ASjxWvNBAD1xjbVaKA74mWGZys3RGSF7DdeDD3F",
+    "supply": "1",
+    "decimals": 0,
+    "isInitialized": true,
+    "freezeAuthorityOption": 1,
+    "freezeAuthority": "9uBX3ASjxWvNBAD1xjbVaKA74mWGZys3RGSF7DdeDD3F"
+  },
+  "metadataExternal": {
+    "name": "SMB #695",
+    "symbol": "SMB",
+    "description": "SMB is a collection of 5000 randomly generated 24x24 pixels NFTs on the Solana Blockchain. Each SolanaMonkey is unique and comes with different type and attributes varying in rarity.",
+    "seller_fee_basis_points": 500,
+    "image": "https://arweave.net/mpxqOh7tAV3Auh7xSknRZWjXqQzDKh2tD8pMR8RKfmk",
+    "external_url": "https://solanamonkey.business/",
+    "collection": {
+      "name": "SMB Gen2",
+      "family": "SMB"
+    },
+    "attributes": [
+      {
+        "trait_type": "Attributes Count",
+        "value": 2
+      },
+      {
+        "trait_type": "Type",
+        "value": "Red"
+      },
+      {
+        "trait_type": "Clothes",
+        "value": "Green Shirt"
+      },
+      {
+        "trait_type": "Ears",
+        "value": "None"
+      },
+      {
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "trait_type": "Eyes",
+        "value": "None"
+      },
+      {
+        "trait_type": "Hat",
+        "value": "Purple Backwards Cap"
+      }
+    ],
+    "properties": {
+      "files": [
+        {
+          "uri": "https://arweave.net/mpxqOh7tAV3Auh7xSknRZWjXqQzDKh2tD8pMR8RKfmk",
+          "type": "image/png"
+        },
+        {
+          "uri": "https://cdn.solanamonkey.business/gen2/695.png",
+          "type": "image/png",
+          "cdn": true
+        }
+      ],
+      "category": "image",
+      "creators": [
+        {
+          "address": "9uBX3ASjxWvNBAD1xjbVaKA74mWGZys3RGSF7DdeDD3F",
+          "verified": true,
+          "share": 100
+        }
+      ]
+    }
+  }
+}

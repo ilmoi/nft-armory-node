@@ -1,4 +1,5 @@
 import {Keypair, PublicKey} from "@solana/web3.js";
+import bs58 from "bs58";
 import fs from "fs";
 
 export function getEnumKeyByEnumValue(myEnum: any, enumValue: any) {
@@ -89,7 +90,7 @@ export function parseType<T>(v: T): string {
   return typeof (v)
 }
 
-export async function writeToDisk(dir: string, arr: any[]) {
+export function writeToDisk(dir: string, arr: any[]) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
@@ -97,7 +98,24 @@ export async function writeToDisk(dir: string, arr: any[]) {
     const data = JSON.stringify(i, (k, v) => {
       return v instanceof PublicKey ? v.toBase58() : v
     }, 2);
-    fs.writeFile(`output/nft-${i.mint.toBase58()}.json`, data, (err) => {
+    fs.writeFile(`${dir}/nft-${i.mint.toBase58()}.json`, data, (err) => {
+      if (err) {
+        console.log('Write error:', err);
+      }
+    });
+  })
+  console.log('Done writing!')
+}
+
+export function writeTxsToDisk(dir: string, arr: any[]) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+  arr.forEach(i => {
+    const data = JSON.stringify(i, (k, v) => {
+      return v instanceof PublicKey ? v.toBase58() : v
+    }, 2);
+    fs.writeFile(`${dir}/${i.transaction.signatures[0]}.json`, data, (err) => {
       if (err) {
         console.log('Write error:', err);
       }
@@ -108,6 +126,19 @@ export async function writeToDisk(dir: string, arr: any[]) {
 
 export function loadFromDisk(dir: string) {
   const files = fs.readdirSync(dir)
-  return files.map(f => JSON.parse(fs.readFileSync(`${dir}/${f}`, `utf8`)))
+  const parsedFiles: any[] = []
+  files.forEach(f => {
+    try {
+      parsedFiles.push(JSON.parse(fs.readFileSync(`${dir}/${f}`, `utf8`)))
+    } catch (e) {
+      console.log('failed to parse file with error', e)
+      console.log('file was', f)
+    }
+  })
+  return parsedFiles
 }
 
+export function bs58toHex(bString: string): string {
+  const bytes = bs58.decode(bString)
+  return bytes.toString('hex')
+}

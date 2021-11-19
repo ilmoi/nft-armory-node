@@ -4,10 +4,18 @@ function isPresent(dictKey: any, dict: any):boolean {
   return dictKey in dict
 }
 
+const isIterable = (value:any) => {
+  return Symbol.iterator in Object(value);
+}
+
 function countAttributes(files: any[]) {
   const counterDicts: any = {};
   for (const f of files) {
     const attributes = f.metadataExternal.attributes
+    if (!isIterable(attributes)) {
+      continue
+    }
+
     for (const attribute of attributes) {
       const dictName = attribute.trait_type;
       const dictEntry = attribute.value;
@@ -46,6 +54,10 @@ function rankFilesByRarity(files: any[], rarityDicts: any) {
   for (const f of scoredFiles) {
     let totalScore = 0;
     const attributes = f.metadataExternal.attributes
+    if (!isIterable(attributes)) {
+      continue
+    }
+
     for (const attribute of attributes) {
       totalScore += rarityDicts[attribute.trait_type][attribute.value]
     }
@@ -61,7 +73,7 @@ function rankFilesByRarity(files: any[], rarityDicts: any) {
   return sortedScoredFiles
 }
 
-const files = loadFromDisk('aurory')
+const files = loadFromDisk('smb')
 const t1 = performance.now()
 
 const attrs = countAttributes(files)
