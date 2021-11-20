@@ -21,7 +21,6 @@
       {
         "accountIndex": 1,
         "mint": "5jFnsfx36DyGk8uVGrbXnVUMTsBkPXGpx6e69BiGFzko",
-        "owner": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
         "uiTokenAmount": {
           "amount": "0",
           "decimals": 9,
@@ -32,7 +31,6 @@
       {
         "accountIndex": 2,
         "mint": "5jFnsfx36DyGk8uVGrbXnVUMTsBkPXGpx6e69BiGFzko",
-        "owner": "ERi3rfpq1qKetkSbsFNN13YDidKD42icvMh3k1TKWYmN",
         "uiTokenAmount": {
           "amount": "7000000000000",
           "decimals": 9,
@@ -52,7 +50,6 @@
       {
         "accountIndex": 1,
         "mint": "5jFnsfx36DyGk8uVGrbXnVUMTsBkPXGpx6e69BiGFzko",
-        "owner": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
         "uiTokenAmount": {
           "amount": "6000000000000",
           "decimals": 9,
@@ -63,7 +60,6 @@
       {
         "accountIndex": 2,
         "mint": "5jFnsfx36DyGk8uVGrbXnVUMTsBkPXGpx6e69BiGFzko",
-        "owner": "ERi3rfpq1qKetkSbsFNN13YDidKD42icvMh3k1TKWYmN",
         "uiTokenAmount": {
           "amount": "1000000000000",
           "decimals": 9,

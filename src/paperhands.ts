@@ -38,21 +38,51 @@ function triageTxByExchange(tx: any, owner: string) {
       if (isSolanartPurchaseTx(tx)) {
         parseTx(tx, owner, exchange)
       }
-      break;
+      return;
     case "MEisE1HzehtrDpAAT8PnLHjpSSkRYakotTuJRPjTpo8":
       exchange = 'MagicEden'
       console.log(`tx ${sig} is ${exchange}`)
       if (isMagicEdenPurchaseTx(tx)) {
         parseTx(tx, owner, exchange)
       }
-      break;
+      return;
     case "A7p8451ktDCHq5yYaHczeLMYsjRsAkzc3hCXcSrwYHU7":
       exchange = 'DigitalEyez'
       console.log(`tx ${sig} is ${exchange}`)
       if (isDigitalEyezPurchaseTx(tx)) {
         parseTx(tx, owner, exchange)
       }
-      break;
+      return;
+    case "HZaWndaNWHFDd9Dhk5pqUUtsmoBCqzb1MLu3NAh1VX6B":
+      exchange = 'AlphaArt'
+      console.log(`tx ${sig} is ${exchange}`)
+      if (isDigitalEyezPurchaseTx(tx)) { //todo
+        parseTx(tx, owner, exchange)
+      }
+      return;
+    case "AmK5g2XcyptVLCFESBCJqoSfwV3znGoVYQnqEnaAZKWn":
+      exchange = 'ExchangeArt'
+      console.log(`tx ${sig} is ${exchange}`)
+      if (isDigitalEyezPurchaseTx(tx)) { //todo
+        parseTx(tx, owner, exchange)
+      }
+      return;
+    case "617jbWo616ggkDxvW1Le8pV38XLbVSyWY8ae6QUmGBAU":
+      exchange = 'SolSea'
+      console.log(`tx ${sig} is ${exchange}`)
+      if (isDigitalEyezPurchaseTx(tx)) { //todo
+        parseTx(tx, owner, exchange)
+      }
+      return;
+  }
+  // ftx's program is used in the 1st, not last ix todo - I think... verify wtf this addr is
+  const FTXProgId = tx.transaction.message.instructions.at(0).programId.toBase58();
+  if (FTXProgId === "4MNPdKu9wFMvEeZBMt3Eipfs5ovVWTJb31pEXDJAAxX5") {
+    exchange = 'FTX'
+    console.log(`tx ${sig} is ${exchange}`)
+    if (isDigitalEyezPurchaseTx(tx)) { //todo
+      parseTx(tx, owner, exchange)
+    }
   }
 }
 
@@ -80,7 +110,7 @@ function isDigitalEyezPurchaseTx(tx: any) {
   const isPurchase = ixNr === 10
   //check is not using the buy instruction to cancel
   //todo not great to rely on logs (especially with a typo) but I can't think of a better way
-  // both their purcahse and sale tx have the exact same data signature
+  // both their purchase and cancel txs have the exact same data signatures
   const isNotCancellation = tx.meta.logMessages.indexOf("Program log: Transfering sales tax") > -1
   return isPurchase && isNotCancellation
 }

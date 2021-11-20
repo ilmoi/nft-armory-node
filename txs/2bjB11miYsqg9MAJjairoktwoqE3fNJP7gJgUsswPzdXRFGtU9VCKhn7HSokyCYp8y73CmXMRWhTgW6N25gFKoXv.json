@@ -174,7 +174,6 @@
       {
         "accountIndex": 4,
         "mint": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
-        "owner": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
         "uiTokenAmount": {
           "amount": "0",
           "decimals": 6,
@@ -185,7 +184,6 @@
       {
         "accountIndex": 5,
         "mint": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
-        "owner": "3fr1AhdiAmWLeNrS24CMoAu9pPgbzVhwLtJ6QUPmw2ob",
         "uiTokenAmount": {
           "amount": "3778093840867",
           "decimals": 6,
@@ -196,7 +194,6 @@
       {
         "accountIndex": 6,
         "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "owner": "3fr1AhdiAmWLeNrS24CMoAu9pPgbzVhwLtJ6QUPmw2ob",
         "uiTokenAmount": {
           "amount": "55965838855918",
           "decimals": 6,
@@ -207,7 +204,6 @@
       {
         "accountIndex": 7,
         "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "owner": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
         "uiTokenAmount": {
           "amount": "2656003",
           "decimals": 6,
@@ -218,7 +214,6 @@
       {
         "accountIndex": 9,
         "mint": "n8Mpu28RjeYD7oUX3LG1tPxzhRZh3YYLRSHcHRdS3Zx",
-        "owner": "6Ysd94bSnDknaaUitt3FyKia7bDcPjL7MseXDHSCKipV",
         "uiTokenAmount": {
           "amount": "112924519958",
           "decimals": 6,
@@ -229,7 +224,6 @@
       {
         "accountIndex": 10,
         "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "owner": "JU8kmKzDHF9sXWsnoznaFDFezLsE5uomX2JkRMbmsQP",
         "uiTokenAmount": {
           "amount": "69914070422279",
           "decimals": 6,
@@ -240,7 +234,6 @@
       {
         "accountIndex": 11,
         "mint": "So11111111111111111111111111111111111111112",
-        "owner": "JU8kmKzDHF9sXWsnoznaFDFezLsE5uomX2JkRMbmsQP",
         "uiTokenAmount": {
           "amount": "351613998074640",
           "decimals": 9,
@@ -251,7 +244,6 @@
       {
         "accountIndex": 13,
         "mint": "APDFRM3HMr8CAGXwKHiu2f5ePSpaiEJhaURwhsRrUUt9",
-        "owner": "2YM8LrJGRtsDcWeqsjX2EQwJfhArxyDdtDzgt7vrwwbV",
         "uiTokenAmount": {
           "amount": "400304770180",
           "decimals": 6,
@@ -289,7 +281,6 @@
       {
         "accountIndex": 4,
         "mint": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
-        "owner": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
         "uiTokenAmount": {
           "amount": "71602463",
           "decimals": 6,
@@ -300,7 +291,6 @@
       {
         "accountIndex": 5,
         "mint": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
-        "owner": "3fr1AhdiAmWLeNrS24CMoAu9pPgbzVhwLtJ6QUPmw2ob",
         "uiTokenAmount": {
           "amount": "3778022238404",
           "decimals": 6,
@@ -311,7 +301,6 @@
       {
         "accountIndex": 6,
         "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "owner": "3fr1AhdiAmWLeNrS24CMoAu9pPgbzVhwLtJ6QUPmw2ob",
         "uiTokenAmount": {
           "amount": "55966896358971",
           "decimals": 6,
@@ -322,7 +311,6 @@
       {
         "accountIndex": 7,
         "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "owner": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
         "uiTokenAmount": {
           "amount": "1714478",
           "decimals": 6,
@@ -333,7 +321,6 @@
       {
         "accountIndex": 9,
         "mint": "n8Mpu28RjeYD7oUX3LG1tPxzhRZh3YYLRSHcHRdS3Zx",
-        "owner": "6Ysd94bSnDknaaUitt3FyKia7bDcPjL7MseXDHSCKipV",
         "uiTokenAmount": {
           "amount": "112924323926",
           "decimals": 6,
@@ -344,7 +331,6 @@
       {
         "accountIndex": 10,
         "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "owner": "JU8kmKzDHF9sXWsnoznaFDFezLsE5uomX2JkRMbmsQP",
         "uiTokenAmount": {
           "amount": "69913013860751",
           "decimals": 6,
@@ -355,7 +341,6 @@
       {
         "accountIndex": 11,
         "mint": "So11111111111111111111111111111111111111112",
-        "owner": "JU8kmKzDHF9sXWsnoznaFDFezLsE5uomX2JkRMbmsQP",
         "uiTokenAmount": {
           "amount": "351619295905440",
           "decimals": 9,
@@ -366,7 +351,6 @@
       {
         "accountIndex": 13,
         "mint": "APDFRM3HMr8CAGXwKHiu2f5ePSpaiEJhaURwhsRrUUt9",
-        "owner": "2YM8LrJGRtsDcWeqsjX2EQwJfhArxyDdtDzgt7vrwwbV",
         "uiTokenAmount": {
           "amount": "400304547311",
           "decimals": 6,

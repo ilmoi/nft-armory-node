@@ -99,7 +99,6 @@
       {
         "accountIndex": 1,
         "mint": "PRT88RkA4Kg5z7pKnezeNH4mafTvtQdfFgpQTGRjz44",
-        "owner": "ERi3rfpq1qKetkSbsFNN13YDidKD42icvMh3k1TKWYmN",
         "uiTokenAmount": {
           "amount": "494712260",
           "decimals": 6,
@@ -110,7 +109,6 @@
       {
         "accountIndex": 2,
         "mint": "PRT88RkA4Kg5z7pKnezeNH4mafTvtQdfFgpQTGRjz44",
-        "owner": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
         "uiTokenAmount": {
           "amount": "0",
           "decimals": 6,
@@ -135,7 +133,6 @@
       {
         "accountIndex": 2,
         "mint": "PRT88RkA4Kg5z7pKnezeNH4mafTvtQdfFgpQTGRjz44",
-        "owner": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
         "uiTokenAmount": {
           "amount": "494712260",
           "decimals": 6,
