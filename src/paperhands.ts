@@ -17,44 +17,46 @@ async function getTxHistory() {
   // writeTxsToDisk('txs', txs)
   txs.forEach((t, i) => {
     try {
-      console.log(`triaging ${i+1} of ${txs.length}`)
+      console.log(`triaging ${i + 1} of ${txs.length}`)
       // console.log('selected tx', t)
-      triageTx(t, owner.toBase58())
+      triageTxByExchange(t, owner.toBase58())
     } catch (e) {
-      // console.log('uh oh', e)
+      console.log('uh oh', e)
     }
   })
 }
 
-function triageTx(tx: any, owner: string) {
-  if (isSolanartBuyTx(tx)) {
-    console.log('selected', tx.transaction.signatures[0])
-    parseSolanartTx(tx, owner)
+function triageTxByExchange(tx: any, owner: string) {
+  const progId = tx.transaction.message.instructions.at(-1).programId.toBase58();
+  const sig = tx.transaction.signatures[0];
+  let exchange;
+
+  switch (progId) {
+    case "CJsLwbP1iu5DuUikHEJnLfANgKy6stB2uFgvBBHoyxwz":
+      exchange = 'Solanart'
+      console.log(`tx ${sig} is ${exchange}`)
+      if (isSolanartPurchaseTx(tx)) {
+        parseTx(tx, owner, exchange)
+      }
+      break;
+    case "MEisE1HzehtrDpAAT8PnLHjpSSkRYakotTuJRPjTpo8":
+      exchange = 'MagicEden'
+      console.log(`tx ${sig} is ${exchange}`)
+      if (isMagicEdenPurchaseTx(tx)) {
+        parseTx(tx, owner, exchange)
+      }
+      break;
+    case "A7p8451ktDCHq5yYaHczeLMYsjRsAkzc3hCXcSrwYHU7":
+      exchange = 'DigitalEyez'
+      console.log(`tx ${sig} is ${exchange}`)
+      if (isDigitalEyezPurchaseTx(tx)) {
+        parseTx(tx, owner, exchange)
+      }
+      break;
   }
 }
 
-// --------------------------------------- solanart
-
-function isSolanartBuyTx(tx: any) {
-  //check is interacting with Solanart's program
-  const solanartProgram = "CJsLwbP1iu5DuUikHEJnLfANgKy6stB2uFgvBBHoyxwz"
-  const passedAccs = tx.transaction.message.accountKeys;
-  const isSolanart = passedAccs.at(-1).pubkey.toBase58() === solanartProgram
-
-  //check is calling the buy instruction
-  const ixData = bs58toHex(tx.transaction.message.instructions.at(-1).data);
-  const ixNr = parseInt(ixData.substr(1,1))
-  // const isPurchase = tx.meta.logMessages.indexOf("Program log: Instruction: Buy") > -1 //the shitty way
-  const isPurchase = ixNr === 5 //the right way
-
-  //check is not using the buy instruction to cancel
-  const ixStruct = parseInt(ixData.substr(2,ixData.length))
-  // const isNotCancellation = tx.meta.logMessages.indexOf("Program log: Sale cancelled by seller") == -1 //the shitty way
-  const isNotCancellation = ixStruct !== 0
-  return isSolanart && isPurchase && isNotCancellation
-}
-
-function parseSolanartTx(tx: any, owner: string) {
+function parseTx(tx: any, owner: string, exchange: string) {
   //identify the token through postTokenBalances
   const tokenMint = tx.meta.preTokenBalances[0].mint
   //there's only one signer = the buyer, that's the acc we need
@@ -63,10 +65,42 @@ function parseSolanartTx(tx: any, owner: string) {
   const postBalances = tx.meta.postBalances
   const buyerSpent = (preBalances[buyerIdx] - postBalances[buyerIdx]) / LAMPORTS_PER_SOL
   if (buyerAcc.toBase58() === owner) {
-    console.log(`Bought ${tokenMint} for ${buyerSpent} SOL on Solanart`)
+    console.log(`Bought ${tokenMint} for ${buyerSpent} SOL on ${exchange}`)
   } else {
-    console.log(`Sold ${tokenMint} for ${buyerSpent} SOL on Solanart`)
+    console.log(`Sold ${tokenMint} for ${buyerSpent} SOL on ${exchange}`)
   }
+}
+
+// --------------------------------------- marketplace specific identifiers
+
+function isDigitalEyezPurchaseTx(tx: any) {
+  const ixData = extractIxData(tx);
+  //check is calling the buy instruction
+  const ixNr = parseInt(ixData.substr(1, 2))
+  const isPurchase = ixNr === 10
+  //check is not using the buy instruction to cancel
+  //todo not great to rely on logs (especially with a typo) but I can't think of a better way
+  // both their purcahse and sale tx have the exact same data signature
+  const isNotCancellation = tx.meta.logMessages.indexOf("Program log: Transfering sales tax") > -1
+  return isPurchase && isNotCancellation
+}
+
+function isMagicEdenPurchaseTx(tx: any) {
+  const ixData = extractIxData(tx);
+  //check is calling the buy instruction
+  const ixNr = parseInt(ixData.substr(1, 2))
+  return ixNr === 38
+}
+
+function isSolanartPurchaseTx(tx: any) {
+  const ixData = extractIxData(tx);
+  //check is calling the buy instruction
+  const ixNr = parseInt(ixData.substr(1, 1))
+  const isPurchase = ixNr === 5 //the right way
+  //check is not using the buy instruction to cancel
+  const ixStruct = parseInt(ixData.substr(2, ixData.length))
+  const isNotCancellation = ixStruct !== 0
+  return isPurchase && isNotCancellation
 }
 
 // --------------------------------------- helpers
@@ -77,6 +111,10 @@ function findSigner(accKeys: any[]) {
       return [i, el.pubkey]
     }
   }
+}
+
+function extractIxData(tx: any): string {
+  return bs58toHex(tx.transaction.message.instructions.at(-1).data);
 }
 
 // --------------------------------------- play

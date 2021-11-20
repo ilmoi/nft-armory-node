@@ -1,0 +1,81 @@
+{
+  "blockTime": 1632901553,
+  "meta": {
+    "err": null,
+    "fee": 5000,
+    "innerInstructions": [],
+    "logMessages": [
+      "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [1]",
+      "Program log: Instruction: CloseAccount",
+      "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 2161 of 200000 compute units",
+      "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success"
+    ],
+    "postBalances": [
+      405567745156,
+      0,
+      1089991680
+    ],
+    "postTokenBalances": [],
+    "preBalances": [
+      101857238,
+      405465892918,
+      1089991680
+    ],
+    "preTokenBalances": [
+      {
+        "accountIndex": 1,
+        "mint": "So11111111111111111111111111111111111111112",
+        "uiTokenAmount": {
+          "amount": "405463853638",
+          "decimals": 9,
+          "uiAmount": 405.463853638,
+          "uiAmountString": "405.463853638"
+        }
+      }
+    ],
+    "rewards": [],
+    "status": {
+      "Ok": null
+    }
+  },
+  "slot": 98893233,
+  "transaction": {
+    "message": {
+      "accountKeys": [
+        {
+          "pubkey": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
+          "signer": true,
+          "writable": true
+        },
+        {
+          "pubkey": "3cdRoPpJj9SB4F1k5Ei4kX9n6TSoxDY2PPDqbcRfiY9S",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "pubkey": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "signer": false,
+          "writable": false
+        }
+      ],
+      "instructions": [
+        {
+          "parsed": {
+            "info": {
+              "account": "3cdRoPpJj9SB4F1k5Ei4kX9n6TSoxDY2PPDqbcRfiY9S",
+              "destination": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK",
+              "owner": "5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK"
+            },
+            "type": "closeAccount"
+          },
+          "program": "spl-token",
+          "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "recentBlockhash": "3NF8XCB4nqKsHmyB1dDQgcH8BL2pseu1pKR7KVP76hR5"
+    },
+    "signatures": [
+      "EK3dFfh2aDNRhBWvWkdPcYF24VUuE9dKuBj2pnyb7Y27mwad1KE7fYRh1n4qs9p2yxq5MZ5S8Poz9RBu76xK3yx"
+    ]
+  }
+}
