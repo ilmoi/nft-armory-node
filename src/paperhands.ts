@@ -1,15 +1,88 @@
 import {Connection, LAMPORTS_PER_SOL, PublicKey} from "@solana/web3.js";
-import {bs58toHex, writeTxsToDisk} from "./helpers/util";
+import {bs58toHex, okToFailAsync} from "./helpers/util";
+import axios from "axios";
+import {CONN} from "./helpers/constants";
+import {programs} from "@metaplex/js";
+import fs from "fs";
+
+const {
+  metaplex: {Store, AuctionManager,},
+  metadata: {Metadata},
+  auction: {Auction},
+  vault: {Vault}
+} = programs;
 
 // const owner = new PublicKey("3xY1KD9NxoDa1WphejAhirGakjxSqhWi2SYppGCoACVj")
 const owner = new PublicKey("5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK")
 
-let inventory: string[] = []
+// --------------------------------------- helpers
+
+function findSigner(accKeys: any[]) {
+  for (const [i, el] of accKeys.entries()) {
+    if (el.signer) {
+      return [i, el.pubkey]
+    }
+  }
+}
+
+function extractIxData(tx: any): string {
+  return bs58toHex(tx.transaction.message.instructions.at(-1).data);
+}
+
+function removeItemOnce(arr: any[], value: number) {
+  const index = arr.indexOf(value);
+  if (index > -1) {
+    arr.splice(index, 1);
+  }
+  return arr;
+}
+
+function findOrCreateNFTEntry(mint: string, props: any) {
+  allNFTs.forEach(nft => {
+    if (nft.mint === mint) {
+      for (const [key, value] of Object.entries(props)) {
+        (nft as any)[key] = value;
+      }
+      return;
+    }
+  })
+  allNFTs.push({
+    mint,
+    ...props,
+  })
+}
+
+// --------------------------------------- get tx history
+
+interface IStats {
+  floor: number,
+  mean: number,
+  median: number,
+}
+
+enum PriceMethod {
+  floor = 'floor',
+  mean = 'mean',
+  median = 'median',
+}
+
+interface INFTData {
+  mint: string,
+  boughtAt?: number
+  soldAt?: number,
+  onchainMetadata?: any,
+  externalMetadata?: any,
+  currentPrices?: IStats,
+  paperhanded?: number,
+  diamondhanded?: number,
+}
+
+let currentNFTMints: string[] = []
+let allNFTs: INFTData[] = []
 let spent = 0;
 let earned = 0;
 
-async function getTxHistory() {
-  const conn = new Connection("https://api.mainnet-beta.solana.com")
+async function getTxHistory(conn: Connection) {
   let txInfos = await conn.getSignaturesForAddress(owner);
   console.log(`got ${txInfos.length} txs to process`)
 
@@ -45,7 +118,8 @@ async function getTxHistory() {
   }
 
   console.log('FINALS:')
-  console.log('inventory:', inventory)
+  console.log('inventory:', currentNFTMints)
+  // console.log('all NFTs:', allNFTs)
   console.log('spent:', spent)
   console.log('earned:', earned)
   console.log('profit:', earned - spent)
@@ -121,11 +195,13 @@ function parseTx(tx: any, owner: string, exchange: string) {
   if (buyerAcc.toBase58() === owner) {
     console.log(`Bought ${tokenMint} for ${buyerSpent} SOL on ${exchange}`)
     spent += buyerSpent
-    inventory.push(tokenMint)
+    currentNFTMints.push(tokenMint)
+    findOrCreateNFTEntry(tokenMint, {boughtAt: buyerSpent})
   } else {
     console.log(`Sold ${tokenMint} for ${buyerSpent} SOL on ${exchange}`)
     earned += buyerSpent
-    inventory = removeItemOnce(inventory, tokenMint)
+    currentNFTMints = removeItemOnce(currentNFTMints, tokenMint)
+    findOrCreateNFTEntry(tokenMint, {soldAt: buyerSpent})
   }
 }
 
@@ -182,29 +258,248 @@ function isSolanartPurchaseTx(tx: any) {
   return isPurchase && isNotCancellation
 }
 
-// --------------------------------------- helpers
+// --------------------------------------- fetch prices
 
-function findSigner(accKeys: any[]) {
-  for (const [i, el] of accKeys.entries()) {
-    if (el.signer) {
-      return [i, el.pubkey]
+const collections = {
+  //creator's address goes here
+  '9BKWqDHfHZh9j39xakYVMdr6hXmCLHH5VfCpeq2idU9L': {
+    'SA': 'degenape',
+    'DE': 'Degenerate%20Ape%20Academy',
+    'ME': 'degenerate_ape_academy',
+  },
+  '9uBX3ASjxWvNBAD1xjbVaKA74mWGZys3RGSF7DdeDD3F': {
+    'DE': 'Solana%20Monkey%20Business',
+    'ME': 'solana_monkey_business',
+  },
+  'DRGNjvBvnXNiQz9dTppGk1tAsVxtJsvhEmojEfBU3ezf': {
+    'ME': 'boryoku_dragonz',
+  },
+  'BHVPUojZvH2mWo5T6ZCJQnyqMTe4McHsXGSJutezTPGE': {
+    'SA': 'saibagang',
+    'ME': 'saiba_gang',
+  },
+  'F5FKqzjucNDYymjHLxMR2uBT43QmaqBAMJwjwkvRRw4A': {
+    'SA': 'solpunks',
+    'ME': 'solpunks',
+  },
+  'AvkbtawpmMSy571f71WsWEn41ATHg5iHw27LoYJdk8QA': {
+    'SA': 'thugbirdz',
+    'DE': 'Thugbirdz',
+    'ME': 'thugbirdz',
+  },
+  'Bhr9iWx7vAZ4JDD5DVSdHxQLqG9RvCLCSXvu6yC4TF6c': {
+    'SA': 'skeletoncrew',
+    'DE': 'Skeleton%20Crew%20SKULLS',
+    'ME': 'skeleton_crew_skulls',
+  }
+}
+
+const collectionCache = {}
+
+function initPricesFromCache(creator: string) {
+  const existingCache = (collectionCache as any)[creator];
+  return existingCache ?? [];
+}
+
+function updateCache(creator: string, prices: number[]) {
+  (collectionCache as any)[creator] = prices;
+}
+
+function calcMedian(values: number[]) {
+  if (values.length === 0) throw new Error("No inputs");
+  values.sort(function (a, b) {
+    return a - b;
+  });
+  const half = Math.floor(values.length / 2);
+  if (values.length % 2)
+    return values[half];
+  return (values[half - 1] + values[half]) / 2.0;
+}
+
+function calcStats(prices: number[]): IStats {
+  let floor: number | null = null;
+  let total = 0;
+  let count = prices.length;
+
+  prices.forEach(p => {
+    //update floor
+    if (floor === null) {
+      floor = p;
+    } else if (p < floor) {
+      floor = p
     }
+    //update total
+    total += p
+  })
+  const mean = total / count;
+  const median = calcMedian(prices)
+  return {floor: floor!, mean: mean, median}
+}
+
+async function fetchSolanartPrices(collection: string) {
+  const collectionName = (collections as any)[collection]['SA']
+  if (!collectionName) return;
+  const apiLink = 'https://qzlsklfacc.medianetwork.cloud'
+  const link = `${apiLink}/nft_for_sale?collection=${collectionName}`
+  const headers = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36'
+  }
+  const {data} = await axios.get(link, {headers})
+  // console.log(data)
+  return data.map((d: any) => d.price)
+}
+
+async function fetchDigitalEyezPrices(collection: string) {
+  const collectionName = (collections as any)[collection]['DE']
+  if (!collectionName) return;
+  const apiLink = 'https://us-central1-digitaleyes-prod.cloudfunctions.net'
+  const link = `${apiLink}/offers-retriever?collection=${collectionName}`
+  const headers = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36'
+  }
+  const {data} = await axios.get(link, {headers})
+  // console.log(data)
+  return data.offers.map((d: any) => d.price / LAMPORTS_PER_SOL)
+}
+
+async function fetchMagicEdenPrices(collection: string) {
+  const collectionName = (collections as any)[collection]['ME']
+  if (!collectionName) return;
+  const apiLink = 'https://api-mainnet.magiceden.io/rpc'
+  const link = `${apiLink}/getListedNFTsByQuery?q=%7B%22$match%22:%7B%22collectionSymbol%22:%22${collectionName}%22%7D,%22$sort%22:%7B%22takerAmount%22:1,%22createdAt%22:-1%7D,%22$skip%22:0,%22$limit%22:20%7D`
+  const headers = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36'
+  }
+  const {data} = await axios.get(link, {headers})
+  // console.log(data)
+  return data.results.map((d: any) => d.price)
+}
+
+async function fetchAndCalcStats(creator: string): Promise<IStats | undefined> {
+  const prices: number[] = initPricesFromCache(creator);
+
+  if (!prices.length) {
+    const responses = await Promise.all([
+      okToFailAsync(fetchSolanartPrices, [creator]),
+      okToFailAsync(fetchDigitalEyezPrices, [creator]),
+      okToFailAsync(fetchMagicEdenPrices, [creator])
+    ])
+    responses.forEach(r => {
+      if (r) {
+        prices.push(...r)
+      }
+    })
+    console.log(`fetched prices for ${creator} creator are:`, prices)
+    updateCache(creator, prices);
+  }
+
+  //if we failed to get prices from cache AND failed to get from mps - quit
+  if (!prices.length) {
+    return;
+  }
+
+  const stats = calcStats(prices)
+  console.log(`final stats for ${creator} creator are:`, stats)
+  return stats;
+}
+
+async function populateNFTsWithPriceStats(nfts: INFTData[]) {
+  const promises: any[] = []
+  nfts.forEach(nft => promises.push(fetchAndCalcStats(nft.onchainMetadata.data.creators[0].address)))
+  const responses = await Promise.all(promises);
+  responses.forEach((r, i) => {
+    nfts[i].currentPrices = r
+  })
+  console.log('Price Stats populated!')
+}
+
+// --------------------------------------- get NFT metadata
+
+export async function fetchNFTMetadata(mint: string, conn: Connection) {
+  console.log('Pulling metadata for:', mint)
+  const metadataPDA = await Metadata.getPDA(mint);
+  let onchainMetadata: any;
+  try {
+    onchainMetadata = (await Metadata.load(conn, metadataPDA)).data;
+  } catch {
+    //no metadata = isn't an actual NFT!
+    return;
+  }
+  const {data: externalMetadata} = await axios.get(onchainMetadata!.data.uri);
+  // const creator = onchainMetadata.data.creators[0].address
+  // console.log('onchain', onchainMetadata)
+  // console.log('external', externalMetadata)
+  return {
+    onchainMetadata,
+    externalMetadata,
   }
 }
 
-function extractIxData(tx: any): string {
-  return bs58toHex(tx.transaction.message.instructions.at(-1).data);
+async function populateNFTsWithMetadata(nfts: INFTData[], conn: Connection) {
+  const promises: any[] = []
+  nfts.forEach(nft => promises.push(fetchNFTMetadata(nft.mint, conn)))
+  const responses = await Promise.all(promises);
+  responses.forEach((r, i) => {
+    nfts[i].onchainMetadata = r.onchainMetadata;
+    nfts[i].externalMetadata = r.externalMetadata;
+  })
+  console.log('Metadata populated!')
 }
 
-function removeItemOnce(arr: any[], value: number) {
-  const index = arr.indexOf(value);
-  if (index > -1) {
-    arr.splice(index, 1);
+// --------------------------------------- calc paperhands
+
+//todo if someone bought / sold the same nft multiple times, that'd be a problem
+
+function calcPaperDiamondHands(nft: INFTData, method: PriceMethod): [number | undefined, number | undefined] {
+  let paper: number | undefined;
+  let diamond: number | undefined;
+  if (nft.soldAt) {
+    paper = nft.soldAt - (nft.currentPrices as any)[method]
+  } else {
+    diamond = (nft.currentPrices as any)[method] - nft.boughtAt!
   }
-  return arr;
+  return [paper, diamond]
+}
+
+function populateNFTsWithPapersAndDiamonds(nfts: INFTData[], method: PriceMethod) {
+  for (const nft of nfts) {
+    if (!nft.currentPrices) {
+      continue;
+    }
+    const [paper, diamond] = calcPaperDiamondHands(nft, method)
+    nft.paperhanded = paper;
+    nft.diamondhanded = diamond;
+  }
 }
 
 // --------------------------------------- play
 
-getTxHistory()
+function writeToDisk(dir: string, arr: any[]) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+  arr.forEach(i => {
+    const data = JSON.stringify(i, (k, v) => {
+      return v instanceof PublicKey ? v.toBase58() : v
+    }, 2);
+    fs.writeFile(`${dir}/nft-${i.mint}.json`, data, (err) => {
+      if (err) {
+        console.log('Write error:', err);
+      }
+    });
+  })
+  console.log('Done writing!')
+}
 
+async function play() {
+  // const conn = new Connection("https://api.mainnet-beta.solana.com")
+  const conn = CONN
+  await getTxHistory(conn)
+  await populateNFTsWithMetadata(allNFTs, conn);
+  await populateNFTsWithPriceStats(allNFTs)
+  populateNFTsWithPapersAndDiamonds(allNFTs, PriceMethod.median)
+  console.log(allNFTs)
+  writeToDisk('paperhands', allNFTs)
+}
+
+play()
