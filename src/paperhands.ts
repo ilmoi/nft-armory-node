@@ -4,26 +4,51 @@ import {bs58toHex, writeTxsToDisk} from "./helpers/util";
 // const owner = new PublicKey("3xY1KD9NxoDa1WphejAhirGakjxSqhWi2SYppGCoACVj")
 const owner = new PublicKey("5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK")
 
+let inventory: string[] = []
+let spent = 0;
+let earned = 0;
+
 async function getTxHistory() {
   const conn = new Connection("https://api.mainnet-beta.solana.com")
-  const txInfos = await conn.getSignaturesForAddress(owner);
-  console.log('got sigs')
-  // console.log(sigs)
-  const sigs = txInfos.map(i => i.signature).splice(0, 220)
-  // const sigs = ["vuQMCEaqC5X6tTxW8q5HXU1U5KhhXs3TYXGyXi25FUarh4gsZYSXRi26by81x1wsUDxEEnwCf4kQWs5UdAeR4Qp"]
-  const txs = await conn.getParsedConfirmedTransactions(sigs)
-  console.log('got txs')
-  // console.log(txs)
-  // writeTxsToDisk('txs', txs)
-  txs.forEach((t, i) => {
-    try {
-      console.log(`triaging ${i + 1} of ${txs.length}`)
-      // console.log('selected tx', t)
-      triageTxByExchange(t, owner.toBase58())
-    } catch (e) {
-      console.log('uh oh', e)
+  let txInfos = await conn.getSignaturesForAddress(owner);
+  console.log(`got ${txInfos.length} txs to process`)
+
+  //reverse the array, we want to start with historic transactions not other way around
+  txInfos = txInfos.reverse()
+
+  const sigs = txInfos.map(i => i.signature)
+
+  let i = 1;
+  while (true) {
+    const sigsToProcess = sigs.splice(0, 220)
+    if (!sigsToProcess.length) {
+      console.log('no more sigs to process!')
+      break;
     }
-  })
+
+    console.log(`processing another ${sigsToProcess.length} sigs`)
+    const txs = await conn.getParsedConfirmedTransactions(sigsToProcess)
+    console.log('got txs')
+    // console.log(txs)
+    // writeTxsToDisk('txs', txs)
+    txs.forEach(t => {
+      try {
+        console.log(`triaging ${i} of ${txInfos.length}`)
+        // console.log('selected tx', t)
+        triageTxByExchange(t, owner.toBase58())
+      } catch (e) {
+        console.log('uh oh', e)
+      } finally {
+        i += 1;
+      }
+    })
+  }
+
+  console.log('FINALS:')
+  console.log('inventory:', inventory)
+  console.log('spent:', spent)
+  console.log('earned:', earned)
+  console.log('profit:', earned - spent)
 }
 
 function triageTxByExchange(tx: any, owner: string) {
@@ -74,6 +99,14 @@ function triageTxByExchange(tx: any, owner: string) {
         parseTx(tx, owner, exchange)
       }
       return;
+    case "GvQVaDNLV7zAPNx35FqWmgwuxa4B2h5tuuL73heqSf1C":
+      exchange = 'SMB marketplace'
+      console.log(`tx ${sig} is ${exchange}`)
+      //NOTE: this is NOT a mistake. The SMB market uses the same codebase as DE!
+      if (isDigitalEyezPurchaseTx(tx)) {
+        parseTx(tx, owner, exchange)
+      }
+      return;
   }
 }
 
@@ -87,8 +120,12 @@ function parseTx(tx: any, owner: string, exchange: string) {
   const buyerSpent = (preBalances[buyerIdx] - postBalances[buyerIdx]) / LAMPORTS_PER_SOL
   if (buyerAcc.toBase58() === owner) {
     console.log(`Bought ${tokenMint} for ${buyerSpent} SOL on ${exchange}`)
+    spent += buyerSpent
+    inventory.push(tokenMint)
   } else {
     console.log(`Sold ${tokenMint} for ${buyerSpent} SOL on ${exchange}`)
+    earned += buyerSpent
+    inventory = removeItemOnce(inventory, tokenMint)
   }
 }
 
@@ -140,8 +177,8 @@ function isSolanartPurchaseTx(tx: any) {
   const ixNr = parseInt(ixData.substr(0, 2))
   const isPurchase = ixNr === 5 //the right way
   //check is not using the buy instruction to cancel
-  const ixStruct = parseInt(ixData.substr(2, ixData.length))
-  const isNotCancellation = ixStruct !== 0
+  const ixStruct = ixData.substr(2, ixData.length)
+  const isNotCancellation = ixStruct !== '0000000000000000'
   return isPurchase && isNotCancellation
 }
 
@@ -157,6 +194,14 @@ function findSigner(accKeys: any[]) {
 
 function extractIxData(tx: any): string {
   return bs58toHex(tx.transaction.message.instructions.at(-1).data);
+}
+
+function removeItemOnce(arr: any[], value: number) {
+  const index = arr.indexOf(value);
+  if (index > -1) {
+    arr.splice(index, 1);
+  }
+  return arr;
 }
 
 // --------------------------------------- play
