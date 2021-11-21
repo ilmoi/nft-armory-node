@@ -56,33 +56,24 @@ function triageTxByExchange(tx: any, owner: string) {
     case "HZaWndaNWHFDd9Dhk5pqUUtsmoBCqzb1MLu3NAh1VX6B":
       exchange = 'AlphaArt'
       console.log(`tx ${sig} is ${exchange}`)
-      if (isDigitalEyezPurchaseTx(tx)) { //todo
+      if (isAlphaArtPurchaseTx(tx)) {
         parseTx(tx, owner, exchange)
       }
       return;
     case "AmK5g2XcyptVLCFESBCJqoSfwV3znGoVYQnqEnaAZKWn":
       exchange = 'ExchangeArt'
       console.log(`tx ${sig} is ${exchange}`)
-      if (isDigitalEyezPurchaseTx(tx)) { //todo
+      if (isExchangeArtPurchaseTx(tx)) {
         parseTx(tx, owner, exchange)
       }
       return;
     case "617jbWo616ggkDxvW1Le8pV38XLbVSyWY8ae6QUmGBAU":
       exchange = 'SolSea'
       console.log(`tx ${sig} is ${exchange}`)
-      if (isDigitalEyezPurchaseTx(tx)) { //todo
+      if (isSolSeaPurchaseTx(tx)) {
         parseTx(tx, owner, exchange)
       }
       return;
-  }
-  // ftx's program is used in the 1st, not last ix todo - I think... verify wtf this addr is
-  const FTXProgId = tx.transaction.message.instructions.at(0).programId.toBase58();
-  if (FTXProgId === "4MNPdKu9wFMvEeZBMt3Eipfs5ovVWTJb31pEXDJAAxX5") {
-    exchange = 'FTX'
-    console.log(`tx ${sig} is ${exchange}`)
-    if (isDigitalEyezPurchaseTx(tx)) { //todo
-      parseTx(tx, owner, exchange)
-    }
   }
 }
 
@@ -103,11 +94,32 @@ function parseTx(tx: any, owner: string, exchange: string) {
 
 // --------------------------------------- marketplace specific identifiers
 
+function isSolSeaPurchaseTx(tx: any) {
+  const ixData = extractIxData(tx);
+  //check is calling the buy instruction
+  const ixNr = parseInt(ixData.substr(0, 2))
+  return ixNr === 2
+}
+
+function isExchangeArtPurchaseTx(tx: any) {
+  const ixData = extractIxData(tx);
+  //check is calling the buy instruction
+  const ixNr = parseInt(ixData.substr(0, 2))
+  return ixNr === 1
+}
+
+function isAlphaArtPurchaseTx(tx: any) {
+  const ixData = extractIxData(tx);
+  //check is calling the buy instruction
+  const ixNr = parseInt(ixData.substr(0, 2))
+  return ixNr === 2
+}
+
 function isDigitalEyezPurchaseTx(tx: any) {
   const ixData = extractIxData(tx);
   //check is calling the buy instruction
-  const ixNr = parseInt(ixData.substr(1, 2))
-  const isPurchase = ixNr === 10
+  const ixNr = parseInt(ixData.substr(0, 2))
+  const isPurchase = ixNr === 1
   //check is not using the buy instruction to cancel
   //todo not great to rely on logs (especially with a typo) but I can't think of a better way
   // both their purchase and cancel txs have the exact same data signatures
@@ -118,14 +130,14 @@ function isDigitalEyezPurchaseTx(tx: any) {
 function isMagicEdenPurchaseTx(tx: any) {
   const ixData = extractIxData(tx);
   //check is calling the buy instruction
-  const ixNr = parseInt(ixData.substr(1, 2))
-  return ixNr === 38
+  const ixNr = parseInt(ixData.substr(0, 3))
+  return ixNr === 438
 }
 
 function isSolanartPurchaseTx(tx: any) {
   const ixData = extractIxData(tx);
   //check is calling the buy instruction
-  const ixNr = parseInt(ixData.substr(1, 1))
+  const ixNr = parseInt(ixData.substr(0, 2))
   const isPurchase = ixNr === 5 //the right way
   //check is not using the buy instruction to cancel
   const ixStruct = parseInt(ixData.substr(2, ixData.length))
