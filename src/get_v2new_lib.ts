@@ -1,6 +1,5 @@
 import {PublicKey} from "@solana/web3.js"
 import {CONN} from "./helpers/constants";
-import {Account, AnyPublicKey, programs} from '@metaplex/js';
 import axios from "axios";
 import {
   getEnumKeyByEnumValue,
@@ -12,20 +11,20 @@ import {
 import {deserializeTokenAccount, deserializeTokenMint} from "./helpers/spl-token";
 import {EditionData} from "@metaplex/js/lib/programs/metadata";
 import {INFT, INFTParams} from "./helpers/types";
-
-const {
-  metaplex: {Store, AuctionManager,},
-  metadata: {Metadata},
-  auction: {Auction},
-  vault: {Vault}
-} = programs;
+import {
+  Edition,
+  MasterEdition,
+  Metadata,
+  MetadataKey
+} from "@metaplex-foundation/mpl-token-metadata";
+import {Account, AnyPublicKey} from "@metaplex/js";
 
 // --------------------------------------- getters
 
 //will fetch all the editions from master's PDA. Can be long!
 export async function getEditionsFromMaster(masterPDA: AnyPublicKey) {
   const masterInfo = await Account.getInfo(CONN, masterPDA);
-  const me = new programs.metadata.MasterEdition(masterPDA, masterInfo);
+  const me = new MasterEdition(masterPDA, masterInfo);
   const foundEditions = await me.getEditions(CONN);
   console.log(`Found a total of ${foundEditions.length} Editions for ME: ${masterPDA}`);
   return foundEditions;
@@ -79,11 +78,11 @@ export async function getExternalMetadata(uri: string) {
 
 export async function getEditionInfoByMint(mint: PublicKey) {
   //untriaged
-  const pda = await programs.metadata.Edition.getPDA(mint);
+  const pda = await Edition.getPDA(mint);
   const info = await Account.getInfo(CONN, pda);
   const key = info?.data[0];
 
-  const editionType = getEnumKeyByEnumValue(programs.metadata.MetadataKey, key);
+  const editionType = getEnumKeyByEnumValue(MetadataKey, key);
   let editionPDA;
   let editionData;
   let masterEditionPDA;
@@ -91,18 +90,18 @@ export async function getEditionInfoByMint(mint: PublicKey) {
 
   //triaged
   switch (key) {
-    case programs.metadata.MetadataKey.EditionV1:
+    case MetadataKey.EditionV1:
       editionPDA = pda;
-      editionData = (new programs.metadata.Edition(pda, info)).data;
+      editionData = (new Edition(pda, info)).data;
       // we can further get master edition info, since we know the parent
       ({
         masterEditionPDA,
         masterEditionData
       } = await okToFailAsync(getParentEdition, [editionData]));
       break;
-    case programs.metadata.MetadataKey.MasterEditionV1:
-    case programs.metadata.MetadataKey.MasterEditionV2:
-      masterEditionData = (new programs.metadata.MasterEdition(pda, info)).data;
+    case MetadataKey.MasterEditionV1:
+    case MetadataKey.MasterEditionV2:
+      masterEditionData = (new MasterEdition(pda, info)).data;
       masterEditionPDA = pda;
       break;
   }
@@ -119,13 +118,13 @@ export async function getEditionInfoByMint(mint: PublicKey) {
 export async function getParentEdition(editionData: EditionData) {
   const masterEditionPDA = new PublicKey(editionData.parent);
   const masterInfo = await Account.getInfo(CONN, masterEditionPDA);
-  const masterEditionData = (new programs.metadata.MasterEdition(masterEditionPDA, masterInfo)).data;
+  const masterEditionData = (new MasterEdition(masterEditionPDA, masterInfo)).data;
   return {masterEditionPDA, masterEditionData};
 }
 
 // --------------------------------------- deserializers
 
-export function deserializeMetadataOnchain(metadatas: programs.metadata.Metadata[]): INFT[] {
+export function deserializeMetadataOnchain(metadatas: Metadata[]): INFT[] {
   return metadatas.map(m => ({
     mint: new PublicKey(m.data.mint),
     metadataPDA: m.pubkey,
@@ -135,7 +134,7 @@ export function deserializeMetadataOnchain(metadatas: programs.metadata.Metadata
 
 // --------------------------------------- together
 
-export async function turnMetadatasIntoNFTs(metadatas: programs.metadata.Metadata[]): Promise<INFT[]> {
+export async function turnMetadatasIntoNFTs(metadatas: Metadata[]): Promise<INFT[]> {
   let NFTs = deserializeMetadataOnchain(metadatas);
 
   //todo temp
