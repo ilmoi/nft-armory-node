@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@metaplex-foundation/mpl-token-metadata": "^0.0.2",
     "@metaplex/js": "^3.4.0",
     "@project-serum/anchor": "^0.18.0",
     "@project-serum/pool": "^0.2.3",

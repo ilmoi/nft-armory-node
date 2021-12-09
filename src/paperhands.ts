@@ -502,4 +502,5 @@ async function play() {
   writeToDisk('paperhands', allNFTs)
 }
 
-play()
+// play()
+

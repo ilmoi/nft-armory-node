@@ -26,7 +26,7 @@ export async function okToFailAsync(callback: any, args: any[], wantObject = fal
     return await callback(...args);
   } catch (e) {
     console.log(`Oh no! ${callback.name} called with ${args} blew up!`);
-    console.log("Full error:", e);
+    // console.log("Full error:", e);
     return wantObject ? {} : undefined;
   }
 }
@@ -36,7 +36,7 @@ export function okToFailSync(callback: any, args: any[], wantObject = false) {
     return callback(...args);
   } catch (e) {
     console.log(`Oh no! ${callback.name} called with ${args} blew up!`);
-    console.log("Full error:", e);
+    // console.log("Full error:", e);
     return wantObject ? {} : undefined;
   }
 }

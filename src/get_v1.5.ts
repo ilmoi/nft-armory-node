@@ -2,7 +2,13 @@ import {PublicKey} from "@solana/web3.js"
 import {CONN} from "./helpers/constants";
 import {Account, AnyPublicKey, programs} from '@metaplex/js';
 import axios from "axios";
-import {getEnumKeyByEnumValue, joinArraysOnKey, okToFailAsync, writeToDisk} from "./helpers/util";
+import {
+  getEnumKeyByEnumValue,
+  joinArraysOnKey,
+  okToFailAsync,
+  stringifyPubkeysInArray,
+  writeToDisk
+} from "./helpers/util";
 import {deserializeTokenAccount, deserializeTokenMint} from "./helpers/spl-token";
 import {EditionData} from "@metaplex/js/lib/programs/metadata";
 import {INFT, INFTParams} from "./helpers/types";
@@ -161,20 +167,36 @@ export async function getNFTs(
     mint,
     updateAuthority
   } = {} as INFTParams): Promise<INFT[]> {
+  const t1 = performance.now();
+
   let metadatas;
   if (owner) {
+    console.log('Time to get em NFTs by owner:', owner.toBase58());
     metadatas = await getMetadataByOwner(owner);
-  } else if (creators && creators.length > 0) {
+  } else if (creators && creators.length > 0 && creators[0] !== null) {
+    console.log('Time to get em NFTs by creators:', stringifyPubkeysInArray(creators));
     metadatas = await getMetadataByCreators(creators);
   } else if (mint) {
+    console.log('Time to get em NFTs by mint:', mint.toBase58());
     metadatas = await getMetadataByMint(mint);
   } else if (updateAuthority) {
+    console.log('Time to get em NFTs by authority:', updateAuthority.toBase58());
     metadatas = await getMetadataByUpdateAuthority(updateAuthority);
   } else {
-    throw new Error("You must pass one of owner / creators / mint / updateAuthority");
+    throw new Error('You must pass one of owner / creator / authority / mint');
   }
+
   console.log(`got ${metadatas.length} metadatas`)
-  return turnMetadatasIntoNFTs(metadatas);
+  const t2 = performance.now();
+
+  const nfts = await turnMetadatasIntoNFTs(metadatas);
+
+  const t3 = performance.now();
+  console.log('Time to find NFTs:', (t2 - t1) / 1000);
+  console.log('Time to fetch Metadata:', (t3 - t2) / 1000);
+  console.log('TOTAL',(t3-t1)/1000)
+
+  return nfts
 }
 
 
@@ -186,7 +208,7 @@ const sneksCreator = new PublicKey("AuTF3kgAyBzsfjGcNABTSzzXK4bVcZcyZJtpCrayxoVp
 const solanautsCreator = new PublicKey("BDYYJ1VzPDXwJoARMZNnN4MX4cZNjVvc5DfFaKzgrruz");
 const creator100 = new PublicKey("5SNz7scF5xiSZxmSzgQRyVGdY8PhEHM5LDMwCKGoFQTZ");
 
-export const ownerMainnet = new PublicKey("5u1vB9UeQSCzzwEhmKPhmQH1veWP9KZyZ8xFxFrmj8CK");
+export const ownerMainnet = new PublicKey("AGsJu1jZmFcVDPdm6bbaP54S3sMEinxmdiYWhaBBDNVX");
 export const ownerDevnet = new PublicKey("AGsJu1jZmFcVDPdm6bbaP54S3sMEinxmdiYWhaBBDNVX");
 export const creatorDevnet = new PublicKey("75ErM1QcGjHiPMX7oLsf9meQdGSUs4ZrwS2X8tBpsZhA");
 
@@ -195,14 +217,11 @@ const creator = creator100;
 const owner = ownerMainnet;
 
 async function play() {
-  const startTime = performance.now();
-  // const nfts = await getNFTs({owner});
-  const nfts = await getNFTs({creators: [creator]});
+  const nfts = await getNFTs({owner});
+  // const nfts = await getNFTs({creators: [creator]});
   // const nfts = await getNFTs({updateAuthority: creator});
   // const nfts = await getNFTs({mint: new PublicKey("Ep6YXiX9tEvhvFpNkDAXLd3yk35Y9kom5nBXFk2ZtV9L")});
-  const endTime = performance.now();
-  console.log(`Total time: ${(endTime - startTime) / 1000}s`)
-  // console.log(nfts);
+
   // await writeToDisk('output', nfts);
 }
 
