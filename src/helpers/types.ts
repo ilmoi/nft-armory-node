@@ -13,7 +13,7 @@ export interface INFT {
   splMintInfo?: MintInfo,
   //metadata stuff
   metadataPDA?: PublicKey,
-  metadataOnchain: MetadataData,
+  metadataOnchain?: MetadataData,
   metadataExternal?: any //maybe one day I'll define this:)
   //edition stuff
   editionType?: string,
@@ -25,7 +25,7 @@ export interface INFT {
 
 export interface INFTParams {
   owner?: PublicKey,
-  creators?: PublicKey[],
+  creator?: PublicKey,
   mint?: PublicKey,
   updateAuthority?: PublicKey,
 }
